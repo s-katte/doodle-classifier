@@ -39,6 +39,7 @@ function setup() {
   prepareData(rainbows, rainbows_data);
 }
 
+//---------display------
 // let total = 100;
 // for (let n = 0; n < total; n++) {
 //   let img = createImage(28, 28);
@@ -57,5 +58,6 @@ function setup() {
 //   let y = floor(n / 10) * 28;
 //   image(img, x, y);
 // }
+//-----end display-----------
 
 function draw() {}
