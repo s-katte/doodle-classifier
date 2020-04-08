@@ -1,6 +1,6 @@
 
 size(280, 280);
-byte[] data = loadBytes("./../datasets/train.npy");
+byte[] data = loadBytes("./../../data/moon.npy");
 //println(data.length);
 
 int total = 1000;
@@ -26,4 +26,4 @@ for (int n = 0; n < total; n++) {
 }
 
 
-saveBytes("./../datasets/trains1000.bin", outdata);
+saveBytes("./../datasets/moons1000.bin", outdata);

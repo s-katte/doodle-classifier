@@ -116,15 +116,22 @@ function setup() {
   let trainButton = select("#train");
   let epochCounter = 0;
   trainButton.mousePressed(function () {
+    let epoch = document.getElementById("epoch");
+
     trainEpoch(training);
     epochCounter++;
     console.log("EPOCH: " + epochCounter);
+    epoch.innerHTML = epochCounter;
   });
 
   let testButton = select("#test");
   testButton.mousePressed(function () {
+    let acc = document.getElementById("acc");
+
     let testPercent = testAll(testing);
     console.log("Percent: " + nf(testPercent, 2, 2) + "%");
+
+    acc.innerHTML = nf(testPercent, 2, 2) + "%";
   });
 
   let guessButton = select("#guess");
@@ -139,17 +146,30 @@ function setup() {
       inputs[i] = (255 - bright) / 255;
     }
     // console.log(inputs);
+    let cat_l = document.getElementById("cat_l");
+    let rainbow_l = document.getElementById("rainbow_l");
+    let train_l = document.getElementById("train_l");
+    let moon_l = document.getElementById("moon_l");
+    let ans = document.getElementById("ans");
 
     let guess = nn.feedforward(inputs);
+    cat_l.innerHTML = nf(guess[0], 1, 2);
+    rainbow_l.innerHTML = nf(guess[1], 1, 2);
+    train_l.innerHTML = nf(guess[2], 1, 2);
+    moon_l.innerHTML = nf(guess[3], 1, 2);
     let classification = guess.indexOf(max(guess));
     if (classification == 0) {
       console.log("cat");
+      ans.innerHTML = "CAT";
     } else if (classification == 1) {
       console.log("rainbow");
+      ans.innerHTML = "RAINBOW";
     } else if (classification == 2) {
       console.log("train");
+      ans.innerHTML = "TRAIN";
     } else if (classification == 3) {
       console.log("moon");
+      ans.innerHTML = "MOON";
     }
     // image(img, 0, 0);
   });
