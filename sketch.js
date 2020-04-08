@@ -9,13 +9,15 @@ let cats = {};
 let trains = {};
 let rainbows = {};
 
+let nn;
+
 function preload() {
   cats_data = loadBytes("./datasets/cats1000.bin");
   trains_data = loadBytes("./datasets/trains1000.bin");
   rainbows_data = loadBytes("./datasets/rainbows1000.bin");
 }
 
-function prepareData(category, data) {
+function prepareData(category, data, label) {
   category.training = [];
   category.testing = [];
 
@@ -24,19 +26,138 @@ function prepareData(category, data) {
     let threshold = floor(0.8 * total_data);
     if (i < threshold) {
       category.training[i] = data.bytes.subarray(offset, offset + len);
+      category.training[i].label = label;
     } else {
-      category.testing[i - 800] = data.bytes.subarray(offset, offset + len);
+      category.testing[i - threshold] = data.bytes.subarray(
+        offset,
+        offset + len
+      );
+      category.testing[i - threshold].label = label;
     }
   }
 }
 
+function trainEpoch(training) {
+  shuffle(training, true);
+
+  //train for one epoch
+  // for (let i = 0; i < training.length; i++) {
+  for (let i = 0; i < training.length; i++) {
+    let data = training[i];
+    let inputs = [];
+    inputs = data.map((x) => x / 255);
+    let label = training[i].label;
+    // console.log(inputs);
+    // console.log(label);
+
+    let targets = [0, 0, 0];
+    targets[label] = 1;
+    // console.log(targets);
+    nn.train(inputs, targets);
+  }
+}
+
+function testAll(testing) {
+  let c = 0;
+  let correct = 0;
+  shuffle(testing, true);
+
+  //train for one epoch
+  for (let i = 0; i < testing.length; i++) {
+    // for (let i = 0; i < 1; i++) {
+    let data = testing[i];
+    let inputs = [];
+    inputs = Array.from(data).map((x) => x / 255);
+    let label = testing[i].label;
+    let guess = nn.feedforward(inputs);
+
+    // console.log(guess);
+    let classification = guess.indexOf(max(guess));
+    // console.log(label);
+    // console.log(classification);
+
+    if (classification === label) {
+      correct++;
+    }
+    c++;
+  }
+  let percentage = (100 * correct) / testing.length;
+  return percentage;
+}
+
 function setup() {
   createCanvas(280, 280);
-  background(0);
+  background(255);
+  //Preparing data
+  prepareData(cats, cats_data, 0);
+  prepareData(trains, trains_data, 1);
+  prepareData(rainbows, rainbows_data, 2);
+  //making the neural netowrk
+  nn = new NeuralNetwork(784, 64, 3);
 
-  prepareData(cats, cats_data);
-  prepareData(trains, trains_data);
-  prepareData(rainbows, rainbows_data);
+  //randomizing
+  let training = [];
+  training = training.concat(cats.training);
+  training = training.concat(rainbows.training);
+  training = training.concat(trains.training);
+  // console.log(training);
+  let testing = [];
+  testing = testing.concat(cats.testing);
+  testing = testing.concat(rainbows.testing);
+  testing = testing.concat(trains.testing);
+  // console.log(testing);
+
+  let trainButton = select("#train");
+  let epochCounter = 0;
+  trainButton.mousePressed(function () {
+    trainEpoch(training);
+    epochCounter++;
+    console.log("EPOCH: " + epochCounter);
+  });
+
+  let testButton = select("#test");
+  testButton.mousePressed(function () {
+    let testPercent = testAll(testing);
+    console.log("Percent: " + nf(testPercent, 2, 2) + "%");
+  });
+
+  let guessButton = select("#guess");
+  guessButton.mousePressed(function () {
+    let inputs = [];
+    let img = get();
+    img.resize(28, 28);
+    // console.log(img);
+    img.loadPixels();
+    for (let i = 0; i < len; i++) {
+      let bright = img.pixels[i * 4];
+      inputs[i] = (255 - bright) / 255;
+    }
+    // console.log(inputs);
+
+    let guess = nn.feedforward(inputs);
+    let classification = guess.indexOf(max(guess));
+    if (classification == 0) {
+      console.log("cat");
+    } else if (classification == 1) {
+      console.log("rainbow");
+    } else if (classification == 2) {
+      console.log("train");
+    }
+    // image(img, 0, 0);
+  });
+
+  let clearButton = select("#clr");
+  clearButton.mousePressed(function () {
+    background(255);
+  });
+
+  // for (let i = 0; i < 5; i++) {
+  //   trainEpoch(training);
+  //   console.log("EPOCH: " + i);
+
+  //   let percentage = testAll(testing);
+  //   console.log("% correct: " + percentage);
+  // }
 }
 
 //---------display------
@@ -60,4 +181,10 @@ function setup() {
 // }
 //-----end display-----------
 
-function draw() {}
+function draw() {
+  strokeWeight(8);
+  stroke(0);
+  if (mouseIsPressed) {
+    line(pmouseX, pmouseY, mouseX, mouseY);
+  }
+}
