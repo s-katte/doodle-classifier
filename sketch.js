@@ -4,10 +4,12 @@ const total_data = 1000;
 let cats_data;
 let trains_data;
 let rainbows_data;
+let moon_data;
 
 let cats = {};
 let trains = {};
 let rainbows = {};
+let moons = {};
 
 let nn;
 
@@ -15,6 +17,7 @@ function preload() {
   cats_data = loadBytes("./datasets/cats1000.bin");
   trains_data = loadBytes("./datasets/trains1000.bin");
   rainbows_data = loadBytes("./datasets/rainbows1000.bin");
+  moon_data = loadBytes("./datasets/moons1000.bin");
 }
 
 function prepareData(category, data, label) {
@@ -50,7 +53,7 @@ function trainEpoch(training) {
     // console.log(inputs);
     // console.log(label);
 
-    let targets = [0, 0, 0];
+    let targets = [0, 0, 0, 0];
     targets[label] = 1;
     // console.log(targets);
     nn.train(inputs, targets);
@@ -92,19 +95,22 @@ function setup() {
   prepareData(cats, cats_data, 0);
   prepareData(trains, trains_data, 1);
   prepareData(rainbows, rainbows_data, 2);
+  prepareData(moons, moon_data, 3);
   //making the neural netowrk
-  nn = new NeuralNetwork(784, 64, 3);
+  nn = new NeuralNetwork(784, 64, 4);
 
   //randomizing
   let training = [];
   training = training.concat(cats.training);
   training = training.concat(rainbows.training);
   training = training.concat(trains.training);
+  training = training.concat(moons.training);
   // console.log(training);
   let testing = [];
   testing = testing.concat(cats.testing);
   testing = testing.concat(rainbows.testing);
   testing = testing.concat(trains.testing);
+  testing = testing.concat(moons.testing);
   // console.log(testing);
 
   let trainButton = select("#train");
@@ -142,6 +148,8 @@ function setup() {
       console.log("rainbow");
     } else if (classification == 2) {
       console.log("train");
+    } else if (classification == 3) {
+      console.log("moon");
     }
     // image(img, 0, 0);
   });
